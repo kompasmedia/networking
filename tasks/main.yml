@@ -2,3 +2,5 @@
 
 - include_tasks: interface.yml
   loop: "{{ networking_interfaces }}"
+- include_task: ipv4_gateway.yml
+
