@@ -12,5 +12,5 @@
     path: /etc/rc.conf
     regexp: "^ifconfig_{{ item.iface }}_ipv6="
     line: ifconfig_{{ item.iface }})_ipv6="inet6 accept_rtadv"
-  when: item.ipv6_slaac == true
+  when: item.ipv6_slaac is defined and item.ipv6_slaac == true
   notify: Restart networking
