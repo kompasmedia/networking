@@ -1,0 +1,7 @@
+---
+
+- name: Configure IPv4 default gateway
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^defaultrouter="
+    line: defaultrouter="{{ networking_ipv4_gateway }}"

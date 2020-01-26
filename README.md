@@ -9,6 +9,7 @@ This role exposes the following variables for your use.
 | Variable | Default value | Function |
 |----------|---------------|----------|
 | networking_interfaces | undefined | List of network interfaces to configure. |
+| networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
 
 ## Configuring a network interface
 
@@ -16,6 +17,7 @@ The **networking_interfaces** variable contains a list of interface definitions 
 through and sets up. An example would be:
 
 ```
+networking_ipv4_gateway: 10.0.0.1
 networking_interfaces:
 - iface: em0
   ipv4_address: 10.0.0.189
