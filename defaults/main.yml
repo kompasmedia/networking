@@ -1,3 +1,4 @@
 ---
 networking_autorestart: false
+networking_gateway_dhcp: true
 
