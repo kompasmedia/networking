@@ -8,6 +8,7 @@ This role exposes the following variables for your use.
 
 | Variable | Default value | Function |
 |----------|---------------|----------|
+| networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
 | networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
 
@@ -17,6 +18,7 @@ The **networking_interfaces** variable contains a list of interface definitions 
 through and sets up. An example would be:
 
 ```
+networking_hostname: bsdbox
 networking_ipv4_gateway: 10.0.0.1
 networking_interfaces:
 - iface: em0
