@@ -1,3 +1,5 @@
 ---
 networking_autorestart: false
+networking_gateway_dhcp: true
+networking_dhcp_type: DHCP
 

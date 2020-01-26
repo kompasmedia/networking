@@ -12,7 +12,7 @@
   lineinfile:
     path: /etc/rc.conf
     regexp: "^ifconfig_{{ item.iface }}="
-    line: ifconfig_{{ item.iface }}="DHCP"
+    line: ifconfig_{{ item.iface }}="{{ networking_dhcp_type|upper }}"
   when: item.ipv4_dhcp is defined and item.ipv4_dhcp == true
   notify: Restart networking
 
