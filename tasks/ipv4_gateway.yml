@@ -14,4 +14,5 @@
     regexp: "^defaultrouter="
     state: absent
   when: networking_gateway_dhcp == true or networking_ipv4_gateway is undefined
+  notify: Restart networking
 
