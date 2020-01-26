@@ -7,3 +7,10 @@
     line: ifconfig_{{ item.iface }}="inet {{ item.ipv4_address }} netmask {{ item.ipv4_netmask }}"
   notify: Restart networking
 
+- name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^ifconfig_{{ item.iface }}_ipv6="
+    line: ifconfig_{{ item.iface }}_ipv6="inet6 accept_rtadv"
+  when: item.ipv6_slaac is defined and item.ipv6_slaac == true
+  notify: Restart networking
