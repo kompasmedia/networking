@@ -31,11 +31,12 @@ This sets up the **em0** interface with a static IPv4-address of 10.0.0.189 and 
 The table below lists the variables you can use in your interface definitions. Required values are
 shown ing **bold** typeface.
 
-| Variable | Function |
-|----------|----------|
-| **iface**    | The name by which the operating system knows this particular interface. |
-| ipv4_address | IPv4 address in dotted-quad notation. |
-| ipv4_netmask | IPv4 netmask in dotted-quad notation. |
+| Variable | Default value | Function |
+|----------|---------------|----------|
+| **iface**    | undefined | The name by which the operating system knows this particular interface. |
+| ipv4_address | undefined | IPv4 address in dotted-quad notation. |
+| ipv4_netmask | undefined | IPv4 netmask in dotted-quad notation. |
+| ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
 
 ## More on network_autorestart
 
