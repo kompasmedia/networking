@@ -1,6 +1,6 @@
 ---
 
-- name: Configure "{{ item.iface }}"
+- name: Configure static IPv4 on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
     regexp: "^ifconfig_{{ item.iface }}="
