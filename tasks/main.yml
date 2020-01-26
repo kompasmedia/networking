@@ -6,4 +6,5 @@
   loop: "{{ networking_interfaces }}"
   when: networking_interfaces is defined
 - include_tasks: ipv4_gateway.yml
+- include_tasks: ipv6_gateway.yml
 

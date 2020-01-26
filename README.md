@@ -14,6 +14,7 @@ This role exposes the following variables for your use.
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
 | networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
+| networking_ipv6_gateway | undefined | IPv6 address of the machine's default gateway. |
 
 ## Configuring a network interface
 
@@ -65,3 +66,10 @@ variable if present, which really shouldn't be the case at all to begin with.
 If you want to use a static IPv4 gateway while still using DHCP on one or more interfaces, set **networking_gateway_dhcp**
 to false. This has no impact on what the DHCP client sees or does with what it gets from the server, but it does
 keep the statically configured gateway from Ansible in place.
+
+## IPv6 configuration
+
+IPv6 has more degrees of freedom than this Ansible role can realistically cater for. For that reason, the variables
+behave in a very simple manner and you are responsible for setting up sensible combinations. For example,
+setting **networking_ipv6_gateway** in combination with SLAAC is legal as far as Anible is concerned, but I really
+wouldn't do that because it'll probably conflict with what SLAAC provides or at the very least not be very useful.
