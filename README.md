@@ -29,12 +29,13 @@ networking_interfaces:
 
 This sets up the **em0** interface with a static IPv4-address of 10.0.0.189 and netmask 255.255.255.0.
 The table below lists the variables you can use in your interface definitions. Required values are
-shown ing **bold** typeface.
+shown in **bold** typeface.
 
 | Variable | Default value | Function |
 |----------|---------------|----------|
 | **iface**    | undefined | The name by which the operating system knows this particular interface. |
 | ipv4_address | undefined | IPv4 address in dotted-quad notation. |
+| ipv4_dhcp | False | Automatically configure IPv4 using DHCP. |
 | ipv4_netmask | undefined | IPv4 netmask in dotted-quad notation. |
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
 
