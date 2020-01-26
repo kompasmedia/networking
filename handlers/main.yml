@@ -2,5 +2,5 @@
 
 - name: Restart networking
   command:
-    cmd: "/etc/rc.d/netif restart && /etc/rc.d/routing restart"
+    cmd: "/etc/rc.d/netif restart && sleep 5 && /etc/rc.d/routing restart"
   when: networking_autorestart == true
