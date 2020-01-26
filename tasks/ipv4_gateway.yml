@@ -5,3 +5,5 @@
     path: /etc/rc.conf
     regexp: "^defaultrouter="
     line: defaultrouter="{{ networking_ipv4_gateway }}"
+  notify: Restart networking
+

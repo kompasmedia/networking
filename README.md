@@ -8,6 +8,7 @@ This role exposes the following variables for your use.
 
 | Variable | Default value | Function |
 |----------|---------------|----------|
+| networking_autorestart| False | Permit Ansible to restart networking at the end of a playbook run to effectuate changes. |
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
 | networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
@@ -35,3 +36,15 @@ shown ing **bold** typeface.
 | **iface**    | The name by which the operating system knows this particular interface. |
 | ipv4_address | IPv4 address in dotted-quad notation. |
 | ipv4_netmask | IPv4 netmask in dotted-quad notation. |
+
+## More on network_autorestart
+
+Permitting Ansible to automatically restart networking services can be both a good and a bad idea
+depending on your situation. If you use Ansible in a chain of events and the playbook does not come
+last, your process may experience serious glitches if the networking on the target hosts gets quite
+rudely interrupted and modified mid-run. That's why **network_autorestart** is set to false by default.
+
+If you're using this role in a more simple environment and you know that resetting the network on your
+machines won't affect you, then you should set **network_autorestart** to true to avoid unnecessary
+reboots.
+
