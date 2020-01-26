@@ -1,0 +1,4 @@
+---
+
+- include_tasks: interface.yml
+  loop: "{{ networking_interfaces }}"
