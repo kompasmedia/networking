@@ -4,3 +4,9 @@
   command:
     cmd: "/etc/rc.d/netif restart && /etc/rc.d/routing restart"
   when: networking_autorestart == true
+
+- name: Enable rtsold
+  service:
+    name: rtsold
+    state: started
+    enabled: true
