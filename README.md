@@ -9,6 +9,7 @@ This role exposes the following variables for your use.
 | Variable | Default value | Function |
 |----------|---------------|----------|
 | networking_autorestart| False | Permit Ansible to restart networking at the end of a playbook run to effectuate changes. |
+| networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
 | networking_gateway_dhcp | True | Use default gateway from DHCP. |
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
