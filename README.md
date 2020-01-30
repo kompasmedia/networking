@@ -46,8 +46,9 @@ shown in **bold** typeface.
 | ipv4_netmask | undefined | IPv4 netmask in dotted-quad notation. |
 | ipv6_prefixlen | undefined | IPv6 prefix length, usually 64. |
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
+| vlans | undefined | List of VLAN numbers from 1 to 4096. |
 
-## More on network_autorestart
+## More on network_autorestart and VLAN's
 
 Permitting Ansible to automatically restart networking services can be both a good and a bad idea
 depending on your situation. If you use Ansible in a chain of events and the playbook does not come
@@ -55,8 +56,19 @@ last, your process may experience serious glitches if the networking on the targ
 rudely interrupted and modified mid-run. That's why **network_autorestart** is set to false by default.
 
 If you're using this role in a more simple environment and you know that resetting the network on your
-machines won't affect you, then you should set **network_autorestart** to true to avoid unnecessary
-reboots.
+machines won't affect you, then you should set **network_autorestart** to true so Ansible can take care
+of reconfiguring the networking according to the requested state
+
+Configuring VLAN's is a bit of a hairy exception to the above. In order to use VLAN's, FreeBSD creates
+a whole new virtual network interface. This new interface behaves exactly like a regular one and you're
+free to configure it accordingly. However, upon the first run of this role the VLAN interfaces will not
+be present when Ansible hits the configuration directives to set them up. This will lead to errors, so
+we force-restart networking whenever changes to VLAN configuration are made.
+
+The above condition can not be postponed over overruled and will **not** honor **network_autorestart**. The
+mechanism used is *flush_handlers*, which will immediately execute any and all queued Ansible handlers that
+are still outstanding in the current playbook. In order to prevent ugly surprises, place this role at the
+very top of your playbook.
 
 ## DHCP and the IPv4 default gateway
 
