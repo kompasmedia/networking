@@ -41,8 +41,10 @@ shown in **bold** typeface.
 |----------|---------------|----------|
 | **iface**    | undefined | The name by which the operating system knows this particular interface. |
 | ipv4_address | undefined | IPv4 address in dotted-quad notation. |
+| ipv6_address | undefined | IPv6 address |
 | ipv4_dhcp | False | Automatically configure IPv4 using DHCP. |
 | ipv4_netmask | undefined | IPv4 netmask in dotted-quad notation. |
+| ipv6_prefixlen | undefined | IPv6 prefix length, usually 64. |
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
 
 ## More on network_autorestart
