@@ -3,7 +3,7 @@
 - name: Restart networking
   command:
     cmd: "/etc/rc.d/netif restart && sleep 5 && /etc/rc.d/routing restart"
-  when: networking_autorestart == true
+  when: networking_autorestart
 
 - name: Force restart networking
   command:
