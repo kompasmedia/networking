@@ -3,7 +3,7 @@
 search {{ networking_dns_search }}
 {% endif %}
 {% if networking_dns_resolvers is defined %}
-{% for resolver in networking_dns_resolver %}
+{% for resolver in networking_dns_resolvers %}
 nameserver {{ resolver }}
 {% endfor %}
 {% endif %}
