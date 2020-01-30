@@ -5,6 +5,10 @@
     cmd: "/etc/rc.d/netif restart && sleep 5 && /etc/rc.d/routing restart"
   when: networking_autorestart == true
 
+- name: Force restart networking
+  command:
+    cmd: "/etc/rc.d/netif restart && sleep 5 && /etc/rc.d/routing restart"
+
 - name: Enable rtsold
   service:
     name: rtsold
