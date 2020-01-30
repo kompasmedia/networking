@@ -7,4 +7,5 @@
   when: networking_interfaces is defined
 - include_tasks: ipv4_gateway.yml
 - include_tasks: ipv6_gateway.yml
-
+- include_tasks: resolvers.yml
+  when: networking_resolvers_dhcp is sameas false

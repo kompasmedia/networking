@@ -1,0 +1,9 @@
+---
+
+- name: Setup DNS resolvers
+  template:
+    src: templates/resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: wheel
+    mode: 0644

@@ -10,11 +10,14 @@ This role exposes the following variables for your use.
 |----------|---------------|----------|
 | networking_autorestart| False | Permit Ansible to restart networking at the end of a playbook run to effectuate changes. |
 | networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
+| networking_dns_resolvers| undefined | List of IP-addresses (IPv4 and/or IPv6) of resolving DNS servers. |
+| networking_dns_search | undefined | Name of the local domain (usually), where the resolver will look for unqualified hostnames. |
 | networking_gateway_dhcp | True | Use default gateway from DHCP. |
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
 | networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
 | networking_ipv6_gateway | undefined | IPv6 address of the machine's default gateway. |
+| networking_resolvers_dhcp | True | Use DNS Resolvers from DHCP(v6) instead of Ansible-configured values. |
 
 ## Configuring a network interface
 
@@ -66,6 +69,30 @@ variable if present, which really shouldn't be the case at all to begin with.
 If you want to use a static IPv4 gateway while still using DHCP on one or more interfaces, set **networking_gateway_dhcp**
 to false. This has no impact on what the DHCP client sees or does with what it gets from the server, but it does
 keep the statically configured gateway from Ansible in place.
+
+## DHCP and the DNS resolvers
+
+Similar to how the default gateway can come from multiple sources, DNS resolvers can be pushed from elsewhere.
+In this case we're looking at:
+
+- Static configuration through Ansible
+- DHCP on an IPv4 interface
+- DHCPv6 on an IPv6 interface
+
+This role will step out of the way once you set **networking_resolvers_dhcp** to true, which is indeed the
+default behavior, similar to what **networking_gateway_dhcp** does. The reason why we're allowing ourselves to be
+overruled by DHCP(v6) is because the owner of the local network, who took the effort to set up a DHCP server,
+is likely to know best which DNS resolvers should actually be used.
+
+Of course, if you disagree and somehow must push alternative DNS resolvers, you can do so through Ansible. Just
+set **networking_resolvers_dhcp** to false and configure them manually.
+
+```
+networking_dns_search: "lan.acme.com"
+networking_dns_resolvers:
+- "8.8.8.8"
+- "8.8.8.4"
+```
 
 ## IPv6 configuration
 
