@@ -22,7 +22,9 @@
     regexp: "^ifconfig_{{ item.iface }}_ipv6="
     line: ifconfig_{{ item.iface }}_ipv6="inet6 {{ item.ipv6_address }} prefixlen {{ item.ipv6_prefixlen }}"
   when: (item.ipv6_slaac is not defined or item.ipv6_slaac == false ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
-  notify: Restart networking
+  notify:
+    - Disable rtsold
+    - Restart networking
 
 - name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
   lineinfile:
