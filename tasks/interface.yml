@@ -15,24 +15,24 @@
 - name: Configure static IPv4 on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface }}="
-    line: ifconfig_{{ item.iface }}="inet {{ item.ipv4_address }} netmask {{ item.ipv4_netmask }}"
+    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}="
+    line: ifconfig_{{ item.iface|replace('.','_') }}="inet {{ item.ipv4_address }} netmask {{ item.ipv4_netmask }}"
   when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
   notify: Restart networking
 
 - name: Configure IPv4 through DHCP on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface }}="
-    line: ifconfig_{{ item.iface }}="{{ networking_dhcp_type|upper }}"
+    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}="
+    line: ifconfig_{{ item.iface|replace('.','_') }}="{{ networking_dhcp_type|upper }}"
   when: item.ipv4_dhcp is defined and item.ipv4_dhcp == true
   notify: Restart networking
 
 - name: Configure static IPv6 on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface }}_ipv6="
-    line: ifconfig_{{ item.iface }}_ipv6="inet6 {{ item.ipv6_address }} prefixlen {{ item.ipv6_prefixlen }}"
+    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}_ipv6="
+    line: ifconfig_{{ item.iface|replace('.','_') }}_ipv6="inet6 {{ item.ipv6_address }} prefixlen {{ item.ipv6_prefixlen }}"
   when: (item.ipv6_slaac is not defined or item.ipv6_slaac == false ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
   notify:
     - Disable rtsold
@@ -45,8 +45,8 @@
 - name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface }}_ipv6="
-    line: ifconfig_{{ item.iface }}_ipv6="inet6 accept_rtadv"
+    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}_ipv6="
+    line: ifconfig_{{ item.iface|replace('.','_') }}_ipv6="inet6 accept_rtadv"
   when: item.ipv6_slaac is defined and item.ipv6_slaac == true
   notify: 
     - Restart networking
