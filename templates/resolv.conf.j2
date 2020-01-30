@@ -1,0 +1,9 @@
+# Genarated by Ansible networking role
+{% if networking_dns_search is defined %}
+search {{ networking_dns_search }}
+{% endif %}
+{% if networking_dns_resolvers is defined %}
+{% for resolver in networking_dns_resolvers %}
+nameserver {{ resolver }}
+{% endfor %}
+{% endif %}
