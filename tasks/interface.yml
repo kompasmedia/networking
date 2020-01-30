@@ -6,9 +6,11 @@
     regexp: "^vlans_{{ item.iface }}="
     line: vlans_{{ item.iface }}="{{ item.vlans | join(' ') }}"
   notify: Force restart networking
+  when: item.vlans is defined
 
 - name: Instantiate any configured VLAN interfaces immediately
   meta: flush_handlers
+  when: item.vlans is defined
 
 - name: Configure static IPv4 on {{ item.iface }}
   lineinfile:
