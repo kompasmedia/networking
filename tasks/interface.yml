@@ -16,6 +16,20 @@
   when: item.ipv4_dhcp is defined and item.ipv4_dhcp == true
   notify: Restart networking
 
+- name: Configure static IPv6 on {{ item.iface }}
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^ifconfig_{{ item.iface }}_ipv6="
+    line: ifconfig_{{ item.iface }}_ipv6="inet6 {{ item.ipv6_address }} prefixlen {{ item.ipv6_prefixlen }}"
+  when: (item.ipv6_slaac is not defined or item.ipv6_slaac == false ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
+  notify:
+    - Disable rtsold
+    - Restart networking
+
+#--
+# The order of these tasks is important because wee need rtsold to end up enabled
+# even if the previous task disables it for an interface.
+#--
 - name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf

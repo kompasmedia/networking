@@ -10,3 +10,10 @@
     name: rtsold
     state: started
     enabled: true
+
+- name: Disable rtsold
+  service:
+    name: rtsold
+    state: stopped
+    enabled: false
+
