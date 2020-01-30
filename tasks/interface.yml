@@ -5,8 +5,10 @@
     path: /etc/rc.conf
     regexp: "^vlans_{{ item.iface }}="
     line: vlans_{{ item.iface }}="{{ item.vlans | join(' ') }}"
+  notify: Force restart networking
+
+- name: Instantiate any configured VLAN interfaces immediately
   meta: flush_handlers
-  notify: Restart networking
 
 - name: Configure static IPv4 on {{ item.iface }}
   lineinfile:
