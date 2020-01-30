@@ -26,6 +26,10 @@
     - Disable rtsold
     - Restart networking
 
+#--
+# The order of these tasks is important because wee need rtsold to end up enabled
+# even if the previous task disables it for an interface.
+#--
 - name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
