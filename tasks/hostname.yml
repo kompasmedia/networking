@@ -5,4 +5,3 @@
     path: /etc/rc.conf
     regexp: "^hostname="
     line: hostname="{{ networking_hostname }}"
-

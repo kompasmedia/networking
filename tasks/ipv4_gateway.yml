@@ -5,7 +5,7 @@
     path: /etc/rc.conf
     regexp: "^defaultrouter="
     line: defaultrouter="{{ networking_ipv4_gateway }}"
-  when: networking_ipv4_gateway is defined and networking_gateway_dhcp == false
+  when: networking_ipv4_gateway is defined and networking_gateway_dhcp
   notify: Restart networking
 
 - name: Remove statically configured IPv4 gateway
@@ -13,6 +13,5 @@
     path: /etc/rc.conf
     regexp: "^defaultrouter="
     state: absent
-  when: networking_gateway_dhcp == true or networking_ipv4_gateway is undefined
+  when: networking_gateway_dhcp or networking_ipv4_gateway is undefined
   notify: Restart networking
-
