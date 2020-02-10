@@ -2,6 +2,8 @@
 
 - include_tasks: hostname.yml
   when: networking_hostname is defined
+- include_tasks: bridge_modules.yml
+  when: networking_bridges is defined
 - include_tasks: interface.yml
   loop: "{{ networking_interfaces }}"
   when: networking_interfaces is defined

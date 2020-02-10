@@ -9,6 +9,7 @@ This role exposes the following variables for your use.
 | Variable | Default value | Function |
 |----------|---------------|----------|
 | networking_autorestart| False | Permit Ansible to restart networking at the end of a playbook run to effectuate changes. |
+| networking_bridges | Undefined | List of bridge interfaces to create at system startup. |
 | networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
 | networking_dns_resolvers| undefined | List of IP-addresses (IPv4 and/or IPv6) of resolving DNS servers. |
 | networking_dns_search | undefined | Name of the local domain (usually), where the resolver will look for unqualified hostnames. |
@@ -69,6 +70,39 @@ The above condition can not be postponed over overruled and will **not** honor *
 mechanism used is *flush_handlers*, which will immediately execute any and all queued Ansible handlers that
 are still outstanding in the current playbook. In order to prevent ugly surprises, place this role at the
 very top of your playbook.
+
+## Bridges
+
+A bridge in FreeBSD behaves quite like a virtualized unmanaged layer-2 switch. It forwards traffic to interfaces
+that are connected to it, so-called *members* of the bridge. It will even learn attached interfaces' MAC addresses
+like a real switch and knows how to deal with spanning tree protocols. This is a very useful type of interface
+to have available when working with virtualization and/or jails.
+
+In a setup with VNET jails on a host, it's common practice to use a single bridge interface as the gateway
+in an RFC1918 subnet while each invidual jail is outfitted with *epair* network interfaces. An *epair* is a
+special kind of virtual network interface in FreeBSD which connects two points as if there were a virtual cable
+in place. In this case one end is made a member of the bridge while the other is attached to the VNET jail's
+local networking stack. In this way the host system can behave as NAT gateway between the bridge and the
+host machine's own physical uplink.
+
+Bridges are defined using the **networking_bridges** variable like so:
+
+```
+networking_bridges:
+- name: bridge0
+  members: ['em0','em1']
+```
+
+This creates a single *bridge* interface with *em0* and *em1* as members. The bridge interface itself can
+be setup with IP-configurations just like any other regular interface. For the VNET-setup described above
+one could set it up with the first address in a private subnet:
+
+```
+networking_interfaces:
+- iface: bridge0
+  ipv4_address: "10.30.0.1"
+  ipv4_netmask: "255.255.255.0"
+```
 
 ## DHCP and the IPv4 default gateway
 
