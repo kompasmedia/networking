@@ -6,7 +6,7 @@
 
 - name: Initialize list of ifconfig ipv6 fragments
   set_fact:
-    networking_iface_ifconfig: []
+    networking_iface_ifconfigv6: []
 
 - name: Assume we're not dealing with a bridge
   set_fact:
@@ -20,24 +20,34 @@
 - name: Initialize empty list for brigde-member fragments
   set_fact:
     networking_iface_members: []
-  when: networking_{{ item.iface }}_is_bridge
+  when: networking_iface_is_bridge
 
-- name: Generate fragment for static IPv4 configuration
+- name: Generate fragment for static IPv4 configuration on {{ item.iface }}
   set_fact:
-    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [inet {{ item.ipv4_address | ipaddr }} netmask {{ item.ipv4_netmask | ipaddr }}]"
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ 'inet {{ item.ipv4_address | ipaddr }} netmask {{ item.ipv4_netmask | ipaddr }}' ]"
   when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
 
-- name: Generate ifconfig fragment for members if we are dealing with a bridge
+- name: Generate fragment for IPv4 configuration through DHCP on {{ item.iface }}
   set_fact:
-    networking_iface_members: "{{ networking_iface_members }} + [addm {{ member }}]"
-  with_items: item.members
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_dhcp_type | upper }}' ]"
+  when: item.ipv4_dhcp is defined and item.ipv4_dhcp
+
+- name: Generate ifconfig fragment for {{ item.iface }}  members if we are dealing with a bridge
+  set_fact:
+    networking_iface_members: "{{ networking_iface_members }} + [ 'addm {{ member }}' ]"
+  with_items: "{{ item.members }}"
   loop_control:
     loop_var: member
   when: networking_iface_is_bridge
 
-- name: Combine all bridge members into a single ifconfig fragment
+- name: Combine all bridge members for {{ item.iface }} into a single ifconfig fragment
   set_fact:
-    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + {{ networking_iface_members | join(' ') }} up"
+    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }} up"
+  when: networking_iface_is_bridge
+
+- name: Put the bridge members ifconfig fragment on the stack for {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_iface_membersfragment }}' ]"
   when: networking_iface_is_bridge
 
 - name: Configure VLAN's on {{ item.iface }}
@@ -51,20 +61,11 @@
 - name: Instantiate any configured VLAN interfaces immediately
   meta: flush_handlers
 
-- name: Configure static IPv4 on {{ item.iface }}
+- name: Roll the ifconfig list into a single line for {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}="
-    line: ifconfig_{{ item.iface|replace('.','_') }}="inet {{ item.ipv4_address }} netmask {{ item.ipv4_netmask }}"
-  when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
-  notify: Restart networking
-
-- name: Configure IPv4 through DHCP on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}="
-    line: ifconfig_{{ item.iface|replace('.','_') }}="{{ networking_dhcp_type|upper }}"
-  when: item.ipv4_dhcp is defined and item.ipv4_dhcp
+    regexp: "^ifconfig_{{ item.iface | replace('.','_') }}="
+    line: ifconfig_{{ item.iface | replace('.','_') }}="{{ networking_iface_ifconfig | join(' ') }}"
   notify: Restart networking
 
 - name: Configure static IPv6 on {{ item.iface }}
