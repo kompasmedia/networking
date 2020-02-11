@@ -1,0 +1,10 @@
+---
+
+- name: Generate list of bridges
+  set_fact:
+    networking_cloned_interfaces: "{{ networking_cloned_interfaces + item.name }}"
+  with_items: "{{ networking_bridges }}"
+
+- name: Demonstrate list of cloned interfaces
+  debug: var=networking_cloned_interfaces
+
