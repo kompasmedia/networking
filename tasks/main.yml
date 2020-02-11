@@ -6,6 +6,7 @@
   when: networking_bridges is defined
 - include_tasks: bridges.yml
   when: networking_bridges is defined
+- include_tasks: cloned_interfaces.yml
 - include_tasks: interface.yml
   loop: "{{ networking_interfaces }}"
   when: networking_interfaces is defined
