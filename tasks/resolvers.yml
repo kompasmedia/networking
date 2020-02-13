@@ -7,3 +7,19 @@
     owner: root
     group: wheel
     mode: 0644
+
+- name: Stop DHCP client from setting its version of DNS resolution
+  lineinfile:
+    path: /etc/dhclient.conf
+    regexp: "^superseed domain-name-servers"
+    line: "superseed domain-name-servers {{ networking_dns_resolvers | join(' ') }};"
+  when: not networking_resolvers_dhcp
+  notify: Restart networking
+
+- name: Permit DHCP client to set DNS resolvers
+  lineinfile:
+    path: /etc/dhclient.conf
+    regexp: "^superseed domain-name-servers"
+    state: absent
+  when: networking_resolvers_dhcp
+  notify: Restart networking
