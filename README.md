@@ -48,7 +48,7 @@ shown in **bold** typeface.
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
 | vlans | undefined | List of VLAN numbers from 1 to 4096. |
 
-## More on network_autorestart and VLAN's
+## More on network_autorestart
 
 Permitting Ansible to automatically restart networking services can be both a good and a bad idea
 depending on your situation. If you use Ansible in a chain of events and the playbook does not come
@@ -57,18 +57,7 @@ rudely interrupted and modified mid-run. That's why **network_autorestart** is s
 
 If you're using this role in a more simple environment and you know that resetting the network on your
 machines won't affect you, then you should set **network_autorestart** to true so Ansible can take care
-of reconfiguring the networking according to the requested state
-
-Configuring VLAN's is a bit of a hairy exception to the above. In order to use VLAN's, FreeBSD creates
-a whole new virtual network interface. This new interface behaves exactly like a regular one and you're
-free to configure it accordingly. However, upon the first run of this role the VLAN interfaces will not
-be present when Ansible hits the configuration directives to set them up. This will lead to errors, so
-we force-restart networking whenever changes to VLAN configuration are made.
-
-The above condition can not be postponed over overruled and will **not** honor **network_autorestart**. The
-mechanism used is *flush_handlers*, which will immediately execute any and all queued Ansible handlers that
-are still outstanding in the current playbook. In order to prevent ugly surprises, place this role at the
-very top of your playbook.
+of reconfiguring the networking according to the requested state.
 
 ## Bridges
 
@@ -146,5 +135,5 @@ networking_dns_resolvers:
 
 IPv6 has more degrees of freedom than this Ansible role can realistically cater for. For that reason, the variables
 behave in a very simple manner and you are responsible for setting up sensible combinations. For example,
-setting **networking_ipv6_gateway** in combination with SLAAC is legal as far as Anible is concerned, but I really
-wouldn't do that because it'll probably conflict with what SLAAC provides or at the very least not be very useful.
+setting **networking_ipv6_gateway** in combination with SLAAC is legal as far as Ansible is concerned, but you really
+shouldn't do that because it'll probably conflict with what SLAAC provides or at the very least not be very useful.
