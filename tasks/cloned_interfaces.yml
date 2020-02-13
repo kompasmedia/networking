@@ -1,5 +1,9 @@
 ---
 
+- name: Setup empty list of cloned interfaces
+  set_fact:
+    networking_cloned_interfaces: []
+
 - name: Merge sources of cloned interfaces
   set_fact:
     networking_cloned_interfaces: "{{ networking_bridgenames }}"
@@ -7,16 +11,25 @@
 
 - name: Setup empty list of epairs
   set_fact:
-    networking_epairs: []
+    networking_epair_list: []
+  when: networking_epairs is defined and networking_epairs | int > 0
 
-- name: Gather epair interfaces
+# NOTE: Principle of least surprise
+#
+# Epairs get created starting from zero, which means we get one interface
+# too many if we document 'networking_epairs' to mean 'number of epairs requested',
+# so we substract one from the sequence.
+
+- name: Generate list of epairs to be cloned
   set_fact:
-    networking_epairs: "{{ networking_epairs }} + [ {{ item.iface | replace('.','_) }} ]"
-  when: item.iface | regex_search("^epair")
-  with_items: "{{ networking_interface }}"
+    networking_epairs_list: "{{ networking_epairs_list }} + [ '{{ item }}' ]"
+  with_sequence: start=0 end="{{ networking_epairs | int - 1 }}" format=epair%d
+  when: networking_epairs is defined and networking_epairs | int > 0
 
-- debug:
-    var: networking_epairs
+- name: Add epairs to list of cloned interfaces
+  set_fact:
+    networking_cloned_interfaces: "{{ networking_cloned_interfaces }} + {{ networking_epairs_list }}"
+  when: networking_epairs_list is defined and networking_epairs_list | length > 0
 
 - name: Cloned interfaces equals the list of bridges for now
   lineinfile:
