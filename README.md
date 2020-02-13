@@ -12,6 +12,7 @@ This role exposes the following variables for your use.
 | networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
 | networking_dns_resolvers| undefined | List of IP-addresses (IPv4 and/or IPv6) of resolving DNS servers. |
 | networking_dns_search | undefined | Name of the local domain (usually), where the resolver will look for unqualified hostnames. |
+| networking_epairs | undefined | Number of interfaces of class *epair* to create. |
 | networking_gateway_dhcp | True | Use default gateway from DHCP. |
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
