@@ -68,26 +68,21 @@
     line: ifconfig_{{ item.iface | replace('.','_') }}="{{ networking_iface_ifconfig | join(' ') }}"
   notify: Restart networking
 
-- name: Configure static IPv6 on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}_ipv6="
-    line: ifconfig_{{ item.iface|replace('.','_') }}_ipv6="inet6 {{ item.ipv6_address }} prefixlen {{ item.ipv6_prefixlen }}"
+- name: Generate fragment for static IPv6 on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 {{ item.ipv6_address | ipv6 }} prefixlen {{ item.ipv6_prefixlen }}' ]"
   when: (item.ipv6_slaac is not defined or item.ipv6_slaac ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
-  notify:
-    - Disable rtsold
-    - Restart networking
+  notify: Disable rtsold
 
-# --
-# The order of these tasks is important because wee need rtsold to end up enabled
-# even if the previous task disables it for an interface.
-# --
-- name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
+- name: Generate fragment for SLAAC on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ] ]"
+  when: item.ipv6_slaac is defined and item.ipv6_slaac
+  notify: Enable rtsold
+
+- name: Roll the ifconfig list into a single line for IPv6 on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}_ipv6="
-    line: ifconfig_{{ item.iface|replace('.','_') }}_ipv6="inet6 accept_rtadv"
-  when: item.ipv6_slaac is defined and item.ipv6_slaac
-  notify:
-    - Restart networking
-    - Enable rtsold
+    regexp: "^ifconfig_{{ item.iface | replace('.','_') }}_ipv6="
+    line: ifconfig_{{ item.iface | replace('.','_') }}_ipv6="{{ networking_iface_ifconfigv6 | join(' ') }}"
+  notify: Restart networking
