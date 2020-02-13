@@ -7,3 +7,32 @@
     owner: root
     group: wheel
     mode: 0644
+
+- name: Check for /etc/resolvconf.conf
+  stat:
+    path: /etc/resolvconf.conf
+  register: resolvconf
+
+- name: Create resolvconf.conf if needed
+  file:
+    path: /etc/resolvconf.conf
+    owner: root
+    group: wheel
+    mode: "0640"
+    state: touch
+  when: not resolvconf.stat.exists
+
+- name: Disable resolvconf
+  lineinfile:
+    path: /etc/resolvconf.conf
+    line: "resolvconf=NO"
+  when: not networking_resolvers_dhcp
+  notify: Restart networking
+
+- name: Permit DHCP client to set DNS resolvers
+  lineinfile:
+    path: /etc/resolvconf.conf
+    line: "resolvconf=NO"
+    state: absent
+  when: networking_resolvers_dhcp
+  notify: Restart networking
