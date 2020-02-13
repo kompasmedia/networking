@@ -58,9 +58,6 @@
   notify: Force restart networking
   when: item.vlans is defined
 
-- name: Instantiate any configured VLAN interfaces immediately
-  meta: flush_handlers
-
 - name: Roll the ifconfig list into a single line for {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
