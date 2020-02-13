@@ -12,6 +12,7 @@ This role exposes the following variables for your use.
 | networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
 | networking_dns_resolvers| undefined | List of IP-addresses (IPv4 and/or IPv6) of resolving DNS servers. |
 | networking_dns_search | undefined | Name of the local domain (usually), where the resolver will look for unqualified hostnames. |
+| networking_epairs | undefined | Number of interfaces of class *epair* to create. |
 | networking_gateway_dhcp | True | Use default gateway from DHCP. |
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
@@ -66,13 +67,6 @@ that are connected to it, so-called *members* of the bridge. It will even learn 
 like a real switch and knows how to deal with spanning tree protocols. This is a very useful type of interface
 to have available when working with virtualization and/or jails.
 
-In a setup with VNET jails on a host, it's common practice to use a single bridge interface as the gateway
-in an RFC1918 subnet while each invidual jail is outfitted with *epair* network interfaces. An *epair* is a
-special kind of virtual network interface in FreeBSD which connects two points as if there were a virtual cable
-in place. In this case one end is made a member of the bridge while the other is attached to the VNET jail's
-local networking stack. In this way the host system can behave as NAT gateway between the bridge and the
-host machine's own physical uplink.
-
 Bridges are defined just like any other network interface except for the fact that bridges have members. Member
 interfaces network interfaces that will be connected to and participating on the bridge. Note that the reverse
 also applies. If an interface has no members, Ansible will not treat it as a bridge.
@@ -106,6 +100,27 @@ variable if present, which really shouldn't be the case at all to begin with.
 If you want to use a static IPv4 gateway while still using DHCP on one or more interfaces, set **networking_gateway_dhcp**
 to false. This has no impact on what the DHCP client sees or does with what it gets from the server, but it does
 keep the statically configured gateway from Ansible in place.
+
+## FreeBSD epair(4) interfaces
+
+In a setup with VNET jails on a host, it's common practice to use a single bridge interface as the gateway
+in an RFC1918 subnet while each invidual jail is outfitted with *epair* network interfaces. An *epair* is a
+special kind of virtual network interface in FreeBSD which connects two points as if there were a virtual cable
+in place. In this case one end is made a member of the bridge while the other is attached to the VNET jail's
+local networking stack. In this way the host system can behave as NAT gateway between the bridge and the
+host machine's own physical uplink.
+
+The *epair* interface is created by *interface cloning* and is a bit of a special case because upon creation of
+a single *epair*, you will end up with two new interfaces on your machine. Because you'll usually need a number of
+epairs in sequence, the way we create epair interfaces through Ansible is by passing the number of them we need:
+
+```
+networking_epairs: 10
+```
+
+This will instruct Ansible to generate 10 interface-pairs which will be named *epair0a* and *epair0b* all the way
+through *epair9a* and *epair9b*. Each of these represents the end of a virtual 'cable', so to speak and can be
+configured like any other regular network interface by adding it to **networking_interfaces**.
 
 ## DHCP and the DNS resolvers
 
