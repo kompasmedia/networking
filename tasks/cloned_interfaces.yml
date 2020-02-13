@@ -4,34 +4,29 @@
   set_fact:
     networking_cloned_interfaces: []
 
-- name: Merge sources of cloned interfaces
-  set_fact:
-    networking_cloned_interfaces: "{{ networking_bridgenames }}"
-  when: networking_bridgenames is defined and (networking_bridgenames | length > 0)
-
-- name: Setup empty list of epairs
-  set_fact:
-    networking_epair_list: []
-  when: networking_epairs is defined and networking_epairs | int > 0
-
 # NOTE: Principle of least surprise
 #
 # Epairs get created starting from zero, which means we get one interface
 # too many if we document 'networking_epairs' to mean 'number of epairs requested',
 # so we substract one from the sequence.
 
-- name: Generate list of epairs to be cloned
+- name: Add epairs to cloned interfaces
   set_fact:
-    networking_epairs_list: "{{ networking_epairs_list }} + [ '{{ item }}' ]"
+    networking_cloned_interfaces: "{{ networking_cloned_interfaces }} + [ '{{ item }}' ]"
   with_sequence: start=0 end="{{ networking_epairs | int - 1 }}" format=epair%d
   when: networking_epairs is defined and networking_epairs | int > 0
+
+- name: Add bridges to cloned interfaces
+  set_fact:
+    networking_cloned_interfaces: "{{ networking_cloned_interfaces }} + [ '{{ item.iface }}' ]"
+  with_items: "{{ networking_interfaces | selectattr('members','defined') | list }}"
 
 - name: Add epairs to list of cloned interfaces
   set_fact:
     networking_cloned_interfaces: "{{ networking_cloned_interfaces }} + {{ networking_epairs_list }}"
   when: networking_epairs_list is defined and networking_epairs_list | length > 0
 
-- name: Cloned interfaces equals the list of bridges for now
+- name: Unroll the list of cloned interfaces into the configuration file
   lineinfile:
     path: "/etc/rc.conf"
     regexp: "^cloned_interfaces="
