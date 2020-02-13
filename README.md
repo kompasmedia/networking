@@ -47,6 +47,7 @@ shown in **bold** typeface.
 | ipv4_netmask | undefined | IPv4 netmask in dotted-quad notation. |
 | ipv6_prefixlen | undefined | IPv6 prefix length, usually 64. |
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
+| members | undefined | List of interfaces to add to this bridge as members. |
 | vlans | undefined | List of VLAN numbers from 1 to 4096. |
 
 ## More on network_autorestart
