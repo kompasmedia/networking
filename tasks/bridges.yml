@@ -1,0 +1,10 @@
+---
+
+- name: Setup the list of bridges
+  set_fact:
+    networking_bridgenames: []
+
+- name: Generate list of bridges by name only
+  set_fact:
+    networking_bridgenames: "{{ networking_bridgenames + [ item.name ] }}"
+  with_items: "{{ networking_bridges }}"

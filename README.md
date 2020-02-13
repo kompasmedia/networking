@@ -12,6 +12,7 @@ This role exposes the following variables for your use.
 | networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
 | networking_dns_resolvers| undefined | List of IP-addresses (IPv4 and/or IPv6) of resolving DNS servers. |
 | networking_dns_search | undefined | Name of the local domain (usually), where the resolver will look for unqualified hostnames. |
+| networking_epairs | undefined | Number of interfaces of class *epair* to create. |
 | networking_gateway_dhcp | True | Use default gateway from DHCP. |
 | networking_hostname | undefined | Hostname of the machine without the domain part. |
 | networking_interfaces | undefined | List of network interfaces to configure. |
@@ -48,7 +49,7 @@ shown in **bold** typeface.
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
 | vlans | undefined | List of VLAN numbers from 1 to 4096. |
 
-## More on network_autorestart and VLAN's
+## More on network_autorestart
 
 Permitting Ansible to automatically restart networking services can be both a good and a bad idea
 depending on your situation. If you use Ansible in a chain of events and the playbook does not come
@@ -57,18 +58,34 @@ rudely interrupted and modified mid-run. That's why **network_autorestart** is s
 
 If you're using this role in a more simple environment and you know that resetting the network on your
 machines won't affect you, then you should set **network_autorestart** to true so Ansible can take care
-of reconfiguring the networking according to the requested state
+of reconfiguring the networking according to the requested state.
 
-Configuring VLAN's is a bit of a hairy exception to the above. In order to use VLAN's, FreeBSD creates
-a whole new virtual network interface. This new interface behaves exactly like a regular one and you're
-free to configure it accordingly. However, upon the first run of this role the VLAN interfaces will not
-be present when Ansible hits the configuration directives to set them up. This will lead to errors, so
-we force-restart networking whenever changes to VLAN configuration are made.
+## Bridges
 
-The above condition can not be postponed over overruled and will **not** honor **network_autorestart**. The
-mechanism used is *flush_handlers*, which will immediately execute any and all queued Ansible handlers that
-are still outstanding in the current playbook. In order to prevent ugly surprises, place this role at the
-very top of your playbook.
+A bridge in FreeBSD behaves quite like a virtualized unmanaged layer-2 switch. It forwards traffic to interfaces
+that are connected to it, so-called *members* of the bridge. It will even learn attached interfaces' MAC addresses
+like a real switch and knows how to deal with spanning tree protocols. This is a very useful type of interface
+to have available when working with virtualization and/or jails.
+
+Bridges are defined just like any other network interface except for the fact that bridges have members. Member
+interfaces network interfaces that will be connected to and participating on the bridge. Note that the reverse
+also applies. If an interface has no members, Ansible will not treat it as a bridge.
+
+Bridges themselves can have IP configuration applied, which allows you to set them up as gateways/routers for
+member interfaces. The example below creates a bridge between *em0* and *em1* and assigns a static IPv4 address
+to the bridge itself.
+
+```
+networking_interfaces:
+- iface: bridge0
+  ipv4_address: "10.30.0.1"
+  ipv4_netmask: "255.255.255.0"
+  members: ['em0','em1']
+```
+
+Bridges are also a great way to implement transparent firewalling. You can set up filtering rules on a bridge
+while not assigning an address to the bridge itself. Packets passing through the bridge will still get filtered
+but attackers will have no way to touch the construct where the filtering is actually happening.
 
 ## DHCP and the IPv4 default gateway
 
@@ -83,6 +100,27 @@ variable if present, which really shouldn't be the case at all to begin with.
 If you want to use a static IPv4 gateway while still using DHCP on one or more interfaces, set **networking_gateway_dhcp**
 to false. This has no impact on what the DHCP client sees or does with what it gets from the server, but it does
 keep the statically configured gateway from Ansible in place.
+
+## FreeBSD epair(4) interfaces
+
+In a setup with VNET jails on a host, it's common practice to use a single bridge interface as the gateway
+in an RFC1918 subnet while each invidual jail is outfitted with *epair* network interfaces. An *epair* is a
+special kind of virtual network interface in FreeBSD which connects two points as if there were a virtual cable
+in place. In this case one end is made a member of the bridge while the other is attached to the VNET jail's
+local networking stack. In this way the host system can behave as NAT gateway between the bridge and the
+host machine's own physical uplink.
+
+The *epair* interface is created by *interface cloning* and is a bit of a special case because upon creation of
+a single *epair*, you will end up with two new interfaces on your machine. Because you'll usually need a number of
+epairs in sequence, the way we create epair interfaces through Ansible is by passing the number of them we need:
+
+```
+networking_epairs: 10
+```
+
+This will instruct Ansible to generate 10 interface-pairs which will be named *epair0a* and *epair0b* all the way
+through *epair9a* and *epair9b*. Each of these represents the end of a virtual 'cable', so to speak and can be
+configured like any other regular network interface by adding it to **networking_interfaces**.
 
 ## DHCP and the DNS resolvers
 
@@ -112,5 +150,5 @@ networking_dns_resolvers:
 
 IPv6 has more degrees of freedom than this Ansible role can realistically cater for. For that reason, the variables
 behave in a very simple manner and you are responsible for setting up sensible combinations. For example,
-setting **networking_ipv6_gateway** in combination with SLAAC is legal as far as Anible is concerned, but I really
-wouldn't do that because it'll probably conflict with what SLAAC provides or at the very least not be very useful.
+setting **networking_ipv6_gateway** in combination with SLAAC is legal as far as Ansible is concerned, but you really
+shouldn't do that because it'll probably conflict with what SLAAC provides or at the very least not be very useful.
