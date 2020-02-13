@@ -63,6 +63,7 @@
     path: /etc/rc.conf
     regexp: "^ifconfig_{{ item.iface | replace('.','_') }}="
     line: ifconfig_{{ item.iface | replace('.','_') }}="{{ networking_iface_ifconfig | join(' ') }}"
+  when: networking_iface_ifconfig is defined and networking_iface_ifconfig | length > 0
   notify: Restart networking
 
 - name: Generate fragment for static IPv6 on {{ item.iface }}
@@ -82,4 +83,5 @@
     path: /etc/rc.conf
     regexp: "^ifconfig_{{ item.iface | replace('.','_') }}_ipv6="
     line: ifconfig_{{ item.iface | replace('.','_') }}_ipv6="{{ networking_iface_ifconfigv6 | join(' ') }}"
+  when: networking_iface_ifconfigv6 is defined and networking_iface_ifconfigv6 | length > 0
   notify: Restart networking
