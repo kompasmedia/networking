@@ -1,5 +1,55 @@
 ---
 
+- name: Initialize list of ifconfig fragments
+  set_fact:
+    networking_iface_ifconfig: []
+
+- name: Initialize list of ifconfig ipv6 fragments
+  set_fact:
+    networking_iface_ifconfigv6: []
+
+- name: Assume we're not dealing with a bridge
+  set_fact:
+    networking_iface_is_bridge: false
+
+- name: Check if {{ item.iface }} actually is a bridge
+  set_fact:
+    networking_iface_is_bridge: true
+  when: item.members is defined
+
+- name: Initialize empty list for brigde-member fragments
+  set_fact:
+    networking_iface_members: []
+  when: networking_iface_is_bridge
+
+- name: Generate fragment for static IPv4 configuration on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ 'inet {{ item.ipv4_address | ipv4 }} netmask {{ item.ipv4_netmask | ipv4 }}' ]"
+  when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
+
+- name: Generate fragment for IPv4 configuration through DHCP on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_dhcp_type | upper }}' ]"
+  when: item.ipv4_dhcp is defined and item.ipv4_dhcp
+
+- name: Generate ifconfig fragment for {{ item.iface }}  members if we are dealing with a bridge
+  set_fact:
+    networking_iface_members: "{{ networking_iface_members }} + [ 'addm {{ member }}' ]"
+  with_items: "{{ item.members }}"
+  loop_control:
+    loop_var: member
+  when: networking_iface_is_bridge
+
+- name: Combine all bridge members for {{ item.iface }} into a single ifconfig fragment
+  set_fact:
+    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }} up"
+  when: networking_iface_is_bridge
+
+- name: Put the bridge members ifconfig fragment on the stack for {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_iface_membersfragment }}' ]"
+  when: networking_iface_is_bridge
+
 - name: Configure VLAN's on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
@@ -11,42 +61,28 @@
 - name: Instantiate any configured VLAN interfaces immediately
   meta: flush_handlers
 
-- name: Configure static IPv4 on {{ item.iface }}
+- name: Roll the ifconfig list into a single line for {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}="
-    line: ifconfig_{{ item.iface|replace('.','_') }}="inet {{ item.ipv4_address }} netmask {{ item.ipv4_netmask }}"
-  when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
+    regexp: "^ifconfig_{{ item.iface | replace('.','_') }}="
+    line: ifconfig_{{ item.iface | replace('.','_') }}="{{ networking_iface_ifconfig | join(' ') }}"
   notify: Restart networking
 
-- name: Configure IPv4 through DHCP on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}="
-    line: ifconfig_{{ item.iface|replace('.','_') }}="{{ networking_dhcp_type|upper }}"
-  when: item.ipv4_dhcp is defined and item.ipv4_dhcp
-  notify: Restart networking
-
-- name: Configure static IPv6 on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}_ipv6="
-    line: ifconfig_{{ item.iface|replace('.','_') }}_ipv6="inet6 {{ item.ipv6_address }} prefixlen {{ item.ipv6_prefixlen }}"
+- name: Generate fragment for static IPv6 on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 {{ item.ipv6_address | ipv6 }} prefixlen {{ item.ipv6_prefixlen }}' ]"
   when: (item.ipv6_slaac is not defined or item.ipv6_slaac ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
-  notify:
-    - Disable rtsold
-    - Restart networking
+  notify: Disable rtsold
 
-# --
-# The order of these tasks is important because wee need rtsold to end up enabled
-# even if the previous task disables it for an interface.
-# --
-- name: Configure IPv6 autoconfiguration via SLAAC on {{ item.iface }}
+- name: Generate fragment for SLAAC on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ]"
+  when: item.ipv6_slaac is defined and item.ipv6_slaac
+  notify: Enable rtsold
+
+- name: Roll the ifconfig list into a single line for IPv6 on {{ item.iface }}
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface|replace('.','_') }}_ipv6="
-    line: ifconfig_{{ item.iface|replace('.','_') }}_ipv6="inet6 accept_rtadv"
-  when: item.ipv6_slaac is defined and item.ipv6_slaac
-  notify:
-    - Restart networking
-    - Enable rtsold
+    regexp: "^ifconfig_{{ item.iface | replace('.','_') }}_ipv6="
+    line: ifconfig_{{ item.iface | replace('.','_') }}_ipv6="{{ networking_iface_ifconfigv6 | join(' ') }}"
+  notify: Restart networking

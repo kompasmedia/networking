@@ -70,6 +70,40 @@ mechanism used is *flush_handlers*, which will immediately execute any and all q
 are still outstanding in the current playbook. In order to prevent ugly surprises, place this role at the
 very top of your playbook.
 
+## Bridges
+
+A bridge in FreeBSD behaves quite like a virtualized unmanaged layer-2 switch. It forwards traffic to interfaces
+that are connected to it, so-called *members* of the bridge. It will even learn attached interfaces' MAC addresses
+like a real switch and knows how to deal with spanning tree protocols. This is a very useful type of interface
+to have available when working with virtualization and/or jails.
+
+In a setup with VNET jails on a host, it's common practice to use a single bridge interface as the gateway
+in an RFC1918 subnet while each invidual jail is outfitted with *epair* network interfaces. An *epair* is a
+special kind of virtual network interface in FreeBSD which connects two points as if there were a virtual cable
+in place. In this case one end is made a member of the bridge while the other is attached to the VNET jail's
+local networking stack. In this way the host system can behave as NAT gateway between the bridge and the
+host machine's own physical uplink.
+
+Bridges are defined just like any other network interface except for the fact that bridges have members. Member
+interfaces network interfaces that will be connected to and participating on the bridge. Note that the reverse
+also applies. If an interface has no members, Ansible will not treat it as a bridge.
+
+Bridges themselves can have IP configuration applied, which allows you to set them up as gateways/routers for
+member interfaces. The example below creates a bridge between *em0* and *em1* and assigns a static IPv4 address
+to the bridge itself.
+
+```
+networking_interfaces:
+- iface: bridge0
+  ipv4_address: "10.30.0.1"
+  ipv4_netmask: "255.255.255.0"
+  members: ['em0','em1']
+```
+
+Bridges are also a great way to implement transparent firewalling. You can set up filtering rules on a bridge
+while not assigning an address to the bridge itself. Packets passing through the bridge will still get filtered
+but attackers will have no way to touch the construct where the filtering is actually happening.
+
 ## DHCP and the IPv4 default gateway
 
 This role allows you to set the IPv4 default gateway through **networking_ipv4_gateway** but you're also

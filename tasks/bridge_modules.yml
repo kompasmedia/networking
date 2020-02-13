@@ -1,0 +1,33 @@
+---
+
+- name: Gather info on /boot/loader.conf
+  stat:
+    path: "/boot/loader.conf"
+  register: bootloader_conf
+
+- name: Create the /boot/loader.conf if absent
+  file:
+    path: "/boot/loader.conf"
+    state: touch
+    owner: root
+    group: wheel
+    mode: "0640"
+  when: bootloader_conf.stat.exists == False
+
+- name: Install the bridging kernel module
+  lineinfile:
+    path: "/boot/loader.conf"
+    regexp: "^if_bridge_load="
+    line: if_bridge_load="YES"
+    owner: root
+    group: wheel
+    mode: "0640"
+
+- name: Install the bridging RTSP kernel module
+  lineinfile:
+    path: "/boot/loader.conf"
+    regexp: "^bridgestp_load="
+    line: bridgestp_load="YES"
+    owner: root
+    group: wheel
+    mode: "0640"
