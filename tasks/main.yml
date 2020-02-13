@@ -3,7 +3,7 @@
 - include_tasks: hostname.yml
   when: networking_hostname is defined
 - include_tasks: bridge_modules.yml
-  when: ansible_virtualization_role != guest and ansible_virtualization_type != "jails"
+  when: ansible_virtualization_role is defined and ansible_virtualization_role != guest and ansible_virtualization_type is defined and ansible_virtualization_type != "jails"
 - include_tasks: bridges.yml
   when: networking_bridges is defined
 - include_tasks: cloned_interfaces.yml
