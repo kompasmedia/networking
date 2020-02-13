@@ -9,7 +9,6 @@ This role exposes the following variables for your use.
 | Variable | Default value | Function |
 |----------|---------------|----------|
 | networking_autorestart| False | Permit Ansible to restart networking at the end of a playbook run to effectuate changes. |
-| networking_bridges | Undefined | List of bridge interfaces to create at system startup. |
 | networking_dhcp_type | DHCP | Set to SYNCDHCP to block the boot process while waiting for a DHCP lease. |
 | networking_dns_resolvers| undefined | List of IP-addresses (IPv4 and/or IPv6) of resolving DNS servers. |
 | networking_dns_search | undefined | Name of the local domain (usually), where the resolver will look for unqualified hostnames. |
@@ -85,24 +84,25 @@ in place. In this case one end is made a member of the bridge while the other is
 local networking stack. In this way the host system can behave as NAT gateway between the bridge and the
 host machine's own physical uplink.
 
-Bridges are defined using the **networking_bridges** variable like so:
+Bridges are defined just like any other network interface except for the fact that bridges have members. Member
+interfaces network interfaces that will be connected to and participating on the bridge. Note that the reverse
+also applies. If an interface has no members, Ansible will not treat it as a bridge.
 
-```
-networking_bridges:
-- name: bridge0
-  members: ['em0','em1']
-```
-
-This creates a single *bridge* interface with *em0* and *em1* as members. The bridge interface itself can
-be setup with IP-configurations just like any other regular interface. For the VNET-setup described above
-one could set it up with the first address in a private subnet:
+Bridges themselves can have IP configuration applied, which allows you to set them up as gateways/routers for
+member interfaces. The example below creates a bridge between *em0* and *em1* and assigns a static IPv4 address
+to the bridge itself.
 
 ```
 networking_interfaces:
 - iface: bridge0
   ipv4_address: "10.30.0.1"
   ipv4_netmask: "255.255.255.0"
+  members: ['em0','em1']
 ```
+
+Bridges are also a great way to implement transparent firewalling. You can set up filtering rules on a bridge
+while not assigning an address to the bridge itself. Packets passing through the bridge will still get filtered
+but attackers will have no way to touch the construct where the filtering is actually happening.
 
 ## DHCP and the IPv4 default gateway
 
