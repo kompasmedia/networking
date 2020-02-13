@@ -119,7 +119,7 @@ networking_epairs: 10
 ```
 
 This will instruct Ansible to generate 10 interface-pairs which will be named *epair0a* and *epair0b* all the way
-through *epair0b* and *epair9b*. Each of these represents the end of a virtual 'cable', so to speak and can be
+through *epair9a* and *epair9b*. Each of these represents the end of a virtual 'cable', so to speak and can be
 configured like any other regular network interface by adding it to **networking_interfaces**.
 
 ## DHCP and the DNS resolvers
