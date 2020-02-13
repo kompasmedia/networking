@@ -76,7 +76,7 @@
 
 - name: Generate fragment for SLAAC on {{ item.iface }}
   set_fact:
-    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ] ]"
+    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ]"
   when: item.ipv6_slaac is defined and item.ipv6_slaac
   notify: Enable rtsold
 
