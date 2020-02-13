@@ -5,6 +5,19 @@
     networking_cloned_interfaces: "{{ networking_bridgenames }}"
   when: networking_bridgenames is defined and (networking_bridgenames | length > 0)
 
+- name: Setup empty list of epairs
+  set_fact:
+    networking_epairs: []
+
+- name: Gather epair interfaces
+  set_fact:
+    networking_epairs: "{{ networking_epairs }} + [ {{ item.iface | replace('.','_) }} ]"
+  when: item.iface | regex_search("^epair")
+  with_items: "{{ networking_interface }}"
+
+- debug:
+    var: networking_epairs
+
 - name: Cloned interfaces equals the list of bridges for now
   lineinfile:
     path: "/etc/rc.conf"
