@@ -51,10 +51,9 @@
   when: networking_iface_is_bridge
 
 - name: Configure VLAN's on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^vlans_{{ item.iface }}="
-    line: vlans_{{ item.iface }}="{{ item.vlans | join(' ') }}"
+  sysrc:
+    name: "vlans_{{ item.iface }}"
+    value: "{{ item.vlans | join(' ') }}"
   notify: Force restart networking
   when: item.vlans is defined
 
