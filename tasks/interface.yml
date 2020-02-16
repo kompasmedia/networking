@@ -54,7 +54,7 @@
   sysrc:
     name: "vlans_{{ item.iface }}"
     value: "{{ item.vlans | join(' ') }}"
-  notify: Force restart networking
+  notify: Restart networking
   when: item.vlans is defined
 
 - name: Roll the ifconfig list into a single line for {{ item.iface }}
