@@ -153,3 +153,7 @@ IPv6 has more degrees of freedom than this Ansible role can realistically cater 
 behave in a very simple manner and you are responsible for setting up sensible combinations. For example,
 setting **networking_ipv6_gateway** in combination with SLAAC is legal as far as Ansible is concerned, but you really
 shouldn't do that because it'll probably conflict with what SLAAC provides or at the very least not be very useful.
+
+# Acknowledgements
+
+Thanks to David Lundgren for writing the sysrc module which is integrated into this role.

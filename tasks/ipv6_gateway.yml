@@ -1,17 +1,17 @@
 ---
 
 - name: Configure IPv6 default gateway
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ipv6_defaultrouter="
-    line: ipv6_defaultrouter="{{ networking_ipv6_gateway }}"
+  sysrc:
+    dest: /etc/rc.conf
+    name: ipv6_defaultrouter
+    value: "{{ networking_ipv6_gateway }}"
   when: networking_ipv6_gateway is defined
   notify: Restart networking
 
 - name: Remove statically configured IPv6 gateway
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ipv6_defaultrouter="
+  sysrc:
+    dest: /etc/rc.conf
+    name: ipv6_defaultrouter
     state: absent
   when: networking_ipv6_gateway is undefined
   notify: Restart networking
