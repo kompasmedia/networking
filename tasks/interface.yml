@@ -69,13 +69,16 @@
   set_fact:
     networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 {{ item.ipv6_address | ipv6 }} prefixlen {{ item.ipv6_prefixlen }}' ]"
   when: (item.ipv6_slaac is not defined or item.ipv6_slaac ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
-  notify: Disable rtsold
 
 - name: Generate fragment for SLAAC on {{ item.iface }}
   set_fact:
     networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ]"
   when: item.ipv6_slaac is defined and item.ipv6_slaac
-  notify: Enable rtsold
+
+- name: Set flag to enable rtsold
+  set_fact:
+    networking_enable_rtsold: true
+  when: item.ipv6_slaac is defined and item.ipv6_slaac
 
 - name: Roll the ifconfig list into a single line for IPv6 on {{ item.iface }}
   sysrc:

@@ -15,3 +15,5 @@
 - include_tasks: ipv6_gateway.yml
 - include_tasks: resolvers.yml
   when: networking_resolvers_dhcp is sameas false
+- include_tasks: services.yml
+
