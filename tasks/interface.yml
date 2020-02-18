@@ -51,18 +51,17 @@
   when: networking_iface_is_bridge
 
 - name: Configure VLAN's on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^vlans_{{ item.iface }}="
-    line: vlans_{{ item.iface }}="{{ item.vlans | join(' ') }}"
-  notify: Force restart networking
+  sysrc:
+    name: "vlans_{{ item.iface }}"
+    value: "{{ item.vlans | join(' ') }}"
+  notify: Restart networking
   when: item.vlans is defined
 
 - name: Roll the ifconfig list into a single line for {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface | replace('.','_') }}="
-    line: ifconfig_{{ item.iface | replace('.','_') }}="{{ networking_iface_ifconfig | join(' ') }}"
+  sysrc:
+    dest: /etc/rc.conf
+    name: "ifconfig_{{ item.iface | replace('.','_') }}"
+    value: "{{ networking_iface_ifconfig | join(' ') }}"
   when: networking_iface_ifconfig is defined and networking_iface_ifconfig | length > 0
   notify: Restart networking
 
@@ -70,18 +69,21 @@
   set_fact:
     networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 {{ item.ipv6_address | ipv6 }} prefixlen {{ item.ipv6_prefixlen }}' ]"
   when: (item.ipv6_slaac is not defined or item.ipv6_slaac ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
-  notify: Disable rtsold
 
 - name: Generate fragment for SLAAC on {{ item.iface }}
   set_fact:
     networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ]"
   when: item.ipv6_slaac is defined and item.ipv6_slaac
-  notify: Enable rtsold
+
+- name: Set flag to enable rtsold
+  set_fact:
+    networking_enable_rtsold: true
+  when: item.ipv6_slaac is defined and item.ipv6_slaac
 
 - name: Roll the ifconfig list into a single line for IPv6 on {{ item.iface }}
-  lineinfile:
-    path: /etc/rc.conf
-    regexp: "^ifconfig_{{ item.iface | replace('.','_') }}_ipv6="
-    line: ifconfig_{{ item.iface | replace('.','_') }}_ipv6="{{ networking_iface_ifconfigv6 | join(' ') }}"
+  sysrc:
+    dest: /etc/rc.conf
+    name: "ifconfig_{{ item.iface | replace('.','_') }}_ipv6"
+    value: "{{ networking_iface_ifconfigv6 | join(' ') }}"
   when: networking_iface_ifconfigv6 is defined and networking_iface_ifconfigv6 | length > 0
   notify: Restart networking

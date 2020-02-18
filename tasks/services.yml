@@ -1,0 +1,8 @@
+---
+
+- name: Enable rtsold
+  service:
+    name: rtsold
+    state: started
+    enabled: true
+  when: networking_enable_rtsold
