@@ -13,5 +13,5 @@
     dest: /etc/rc.conf
     name: defaultrouter
     state: absent
-  when: networking_gateway_dhcp or networking_ipv4_gateway is undefined
+  when: networking_ipv4_gateway is defined and not networking_gateway_dhcp
   notify: Restart networking
