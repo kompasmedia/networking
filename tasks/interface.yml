@@ -62,4 +62,4 @@
   notify: Restart networking
 
 - include_tasks: interface_ipv6.yml
-  when: item.ipv6_address is defined or ipv6_slaac
+  when: item.ipv6_address is defined or ipv6_slaac is sameas true
