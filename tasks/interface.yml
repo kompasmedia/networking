@@ -50,11 +50,7 @@
     networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_iface_membersfragment }}' ]"
   when: networking_iface_is_bridge
 
-- name: Configure VLAN's on {{ item.iface }}
-  sysrc:
-    name: "vlans_{{ item.iface }}"
-    value: "{{ item.vlans | join(' ') }}"
-  notify: Restart networking
+- import_tasks: interface_vlan.yml
   when: item.vlans is defined
 
 - name: Roll the ifconfig list into a single line for {{ item.iface }}
