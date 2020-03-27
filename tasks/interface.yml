@@ -2,7 +2,7 @@
 
 
 - include_tasks: interface_ipv6.yml
-  when: item.ipv6_address is defined or ipv6_slaac is sameas true
+  when: item.ipv6_address is defined or item.ipv6_slaac is sameas true
 
 - name: Initialize list of ifconfig fragments
   set_fact:
