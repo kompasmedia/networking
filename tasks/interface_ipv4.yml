@@ -1,0 +1,15 @@
+---
+
+- name: Initialize list of ifconfig fragments
+  set_fact:
+    networking_iface_ifconfig: []
+ 
+- name: Generate fragment for static IPv4 configuration on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ 'inet {{ item.ipv4_address | ipv4 }} netmask {{ item.ipv4_netmask | ipv4 }}' ]"
+  when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
+
+- name: Generate fragment for IPv4 configuration through DHCP on {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_dhcp_type | upper }}' ]"
+  when: item.ipv4_dhcp is defined and item.ipv4_dhcp
