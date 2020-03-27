@@ -1,5 +1,9 @@
 ---
 
+
+- include_tasks: interface_ipv6.yml
+  when: item.ipv6_address is defined or ipv6_slaac is sameas true
+
 - name: Initialize list of ifconfig fragments
   set_fact:
     networking_iface_ifconfig: []
@@ -60,6 +64,3 @@
     value: "{{ networking_iface_ifconfig | join(' ') }}"
   when: networking_iface_ifconfig is defined and networking_iface_ifconfig | length > 0
   notify: Restart networking
-
-- include_tasks: interface_ipv6.yml
-  when: item.ipv6_address is defined or ipv6_slaac is sameas true
