@@ -4,10 +4,6 @@
   set_fact:
     networking_iface_ifconfig: []
 
-- name: Initialize list of ifconfig ipv6 fragments
-  set_fact:
-    networking_iface_ifconfigv6: []
-
 - name: Assume we're not dealing with a bridge
   set_fact:
     networking_iface_is_bridge: false
@@ -65,25 +61,5 @@
   when: networking_iface_ifconfig is defined and networking_iface_ifconfig | length > 0
   notify: Restart networking
 
-- name: Generate fragment for static IPv6 on {{ item.iface }}
-  set_fact:
-    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 {{ item.ipv6_address | ipv6 }} prefixlen {{ item.ipv6_prefixlen }}' ]"
-  when: (item.ipv6_slaac is not defined or item.ipv6_slaac ) and (item.ipv6_address is defined and item.ipv6_prefixlen is defined)
-
-- name: Generate fragment for SLAAC on {{ item.iface }}
-  set_fact:
-    networking_iface_ifconfigv6: "{{ networking_iface_ifconfigv6 }} + [ 'inet6 accept_rtadv' ]"
-  when: item.ipv6_slaac is defined and item.ipv6_slaac
-
-- name: Set flag to enable rtsold
-  set_fact:
-    networking_enable_rtsold: true
-  when: item.ipv6_slaac is defined and item.ipv6_slaac
-
-- name: Roll the ifconfig list into a single line for IPv6 on {{ item.iface }}
-  sysrc:
-    dest: /etc/rc.conf
-    name: "ifconfig_{{ item.iface | replace('.','_') }}_ipv6"
-    value: "{{ networking_iface_ifconfigv6 | join(' ') }}"
-  when: networking_iface_ifconfigv6 is defined and networking_iface_ifconfigv6 | length > 0
-  notify: Restart networking
+- include_tasks: interface_ipv6.yml
+  when: item.ipv6_address is defined or ipv6_slaac
