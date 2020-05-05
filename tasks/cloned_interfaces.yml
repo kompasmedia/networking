@@ -20,6 +20,7 @@
   set_fact:
     networking_cloned_interfaces: "{{ networking_cloned_interfaces }} + [ '{{ item.iface }}' ]"
   with_items: "{{ networking_interfaces | selectattr('members','defined') | list }}"
+  when: networking_interfaces is defined
 
 - name: Add epairs to list of cloned interfaces
   set_fact:
