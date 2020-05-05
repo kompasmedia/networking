@@ -5,4 +5,4 @@
     name: rtsold
     state: started
     enabled: true
-  when: networking_enable_rtsold
+  when: networking_enable_rtsold is defined and networking_enable_rtsold is sameas true

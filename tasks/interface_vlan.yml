@@ -1,0 +1,7 @@
+---
+
+- name: Configure VLAN's on {{ item.iface }}
+  sysrc:
+    name: "vlans_{{ item.iface }}"
+    value: "{{ item.vlans | join(' ') }}"
+  notify: Restart networking

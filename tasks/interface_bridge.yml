@@ -1,0 +1,20 @@
+---
+
+- name: Initialize empty list for brigde-member fragments
+  set_fact:
+    networking_iface_members: []
+
+- name: Generate ifconfig fragment for {{ item.iface }}  members if we are dealing with a bridge
+  set_fact:
+    networking_iface_members: "{{ networking_iface_members }} + [ 'addm {{ member }}' ]"
+  with_items: "{{ item.members }}"
+  loop_control:
+    loop_var: member
+
+- name: Combine all bridge members for {{ item.iface }} into a single ifconfig fragment
+  set_fact:
+    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }} up"
+
+- name: Put the bridge members ifconfig fragment on the stack for {{ item.iface }}
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_iface_membersfragment }}' ]"
