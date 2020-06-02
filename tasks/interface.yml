@@ -38,7 +38,7 @@
 
 - name: Combine all bridge members for {{ item.iface }} into a single ifconfig fragment
   set_fact:
-    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }} up"
+    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }}"
   when: networking_iface_is_bridge
 
 - name: Put the bridge members ifconfig fragment on the stack for {{ item.iface }}
@@ -52,6 +52,12 @@
     value: "{{ item.vlans | join(' ') }}"
   notify: Restart networking
   when: item.vlans is defined
+
+- name: set network interface state
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ item.state }}' ]"
+  when: item.state is defined
+
 
 - name: Roll the ifconfig list into a single line for {{ item.iface }}
   sysrc:
