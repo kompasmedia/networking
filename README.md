@@ -19,6 +19,7 @@ This role exposes the following variables for your use.
 | networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
 | networking_ipv6_gateway | undefined | IPv6 address of the machine's default gateway. |
 | networking_resolvers_dhcp | True | Use DNS Resolvers from DHCP(v6) instead of Ansible-configured values. |
+| networking_enable_rtsold | False | Enable rtsold service at boot |
 
 ## Configuring a network interface
 
