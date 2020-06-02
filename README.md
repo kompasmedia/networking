@@ -159,4 +159,6 @@ shouldn't do that because it'll probably conflict with what SLAAC provides or at
 
 # Acknowledgements
 
-Thanks to David Lundgren for writing the sysrc module which is integrated into this role.
+Thanks to:
+* David Lundgren for writing the sysrc module which is integrated into this role.
+* Aldis Berjoza for contributing IP-less VLAN interfaces and configurable interface state.
