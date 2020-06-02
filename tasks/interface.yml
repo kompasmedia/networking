@@ -21,7 +21,7 @@
 - name: Generate fragment for static IPv4 configuration on {{ item.iface }}
   set_fact:
     networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ 'inet {{ item.ipv4_address | ipv4 }} netmask {{ item.ipv4_netmask | ipv4 }}' ]"
-  when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
+  when: (item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false) and 'ipv4_address' in item
 
 - name: Generate fragment for IPv4 configuration through DHCP on {{ item.iface }}
   set_fact:
@@ -38,7 +38,7 @@
 
 - name: Combine all bridge members for {{ item.iface }} into a single ifconfig fragment
   set_fact:
-    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }} up"
+    networking_iface_membersfragment: "{{ networking_iface_members | join(' ') }}"
   when: networking_iface_is_bridge
 
 - name: Put the bridge members ifconfig fragment on the stack for {{ item.iface }}
@@ -53,6 +53,12 @@
   notify: Restart networking
   when: item.vlans is defined
 
+- name: set network interface state
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ item.state }}' ]"
+  when: item.state is defined
+
+
 - name: Roll the ifconfig list into a single line for {{ item.iface }}
   sysrc:
     dest: /etc/rc.conf
@@ -62,4 +68,4 @@
   notify: Restart networking
 
 - include_tasks: interface_ipv6.yml
-  when: item.ipv6_address is defined or ipv6_slaac
+  when: item.ipv6_address is defined or (item.ipv6_slaac is defined and item.ipv6_slaac)

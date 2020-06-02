@@ -19,6 +19,7 @@ This role exposes the following variables for your use.
 | networking_ipv4_gateway | undefined | IPv4 address of the machine's default gateway in dotted-quad notation. |
 | networking_ipv6_gateway | undefined | IPv6 address of the machine's default gateway. |
 | networking_resolvers_dhcp | True | Use DNS Resolvers from DHCP(v6) instead of Ansible-configured values. |
+| networking_enable_rtsold | False | Enable rtsold service at boot |
 
 ## Configuring a network interface
 
@@ -49,6 +50,7 @@ shown in **bold** typeface.
 | ipv6_slaac | False | Automatically configure IPv6 using SLAAC. |
 | members | undefined | List of interfaces to add to this bridge as members. |
 | vlans | undefined | List of VLAN numbers from 1 to 4096. |
+| state | undefined | 'up' or 'down' |
 
 ## More on network_autorestart
 
@@ -82,6 +84,7 @@ networking_interfaces:
   ipv4_address: "10.30.0.1"
   ipv4_netmask: "255.255.255.0"
   members: ['em0','em1']
+  state: 'up'
 ```
 
 Bridges are also a great way to implement transparent firewalling. You can set up filtering rules on a bridge
