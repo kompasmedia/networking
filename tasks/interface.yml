@@ -21,7 +21,7 @@
 - name: Generate fragment for static IPv4 configuration on {{ item.iface }}
   set_fact:
     networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ 'inet {{ item.ipv4_address | ipv4 }} netmask {{ item.ipv4_netmask | ipv4 }}' ]"
-  when: item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false
+  when: (item.ipv4_dhcp is not defined or item.ipv4_dhcp is sameas false) and 'ipv4_address' in item
 
 - name: Generate fragment for IPv4 configuration through DHCP on {{ item.iface }}
   set_fact:
