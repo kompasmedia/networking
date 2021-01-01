@@ -13,3 +13,8 @@
   set_fact:
     networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ '{{ networking_dhcp_type | upper }}' ]"
   when: item.ipv4_dhcp is defined and item.ipv4_dhcp
+
+- name: Set interface state
+  set_fact:
+    networking_iface_ifconfig: "{{ networking_iface_ifconfig }} + [ ' {{ item.state }}' ]"
+  when: item.state is defined
